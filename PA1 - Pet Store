@@ -1,0 +1,362 @@
+petstore.cpp
+
+/*1.	State the problem clearly:  
+The program will gather information about the “inventory” of a pet store from an input file, 
+then it will print a summary report to petreport.txt.  This goes along with reading and adding the contents of the pet store inventory
+ into vectors, processing the data from those vectors (also use parallel vectors) with creating an output text report. Global variables
+  are NOT allowed in the solution, it all must be within main().  We also should use functions to process the pet data and make portions
+   of the summary report.  The input file contains information about pets, including the store, pet name, animal type, and the number 
+of days the pet has been in the store.  Open and read a file called "petstoredata.csv" that contains information about different pets.
+ There could be any number of pets in the file, and as you read each pet's information, you should immediately print it out without 
+ any changes.  Keep track and alert of names, total number of pets from input, pet store with most pets, number of pets at the store 
+ with the most pets, pet average days on site across all stores, and the employee of the month which is randomly chosen.  Write the 
+ summary at the end.
+2.	The input file contains information about pets, including:
+store name, pet name, animal type, and the number of days each pet has been in the store location. 
+The "Days in store" value is guaranteed to be at least 1, and pets are moved to a different store after 100 days.
+The output file contains information about pets written to petreport. Txt
+3.	The additional requirements show that the program takes the input file containing pet information, puts it based on the provided details, and generates status messages for each pet. Additionally, it creates a pet store summary in the form of an output file named "petreport.txt".
+4.	
+-   Read pet file
+-	Store this data into vectors.
+-	Summary of this data is written to petreport.txt
+-	Close the output file.
+Name: Kirk Shelton
+Class: CPSC122, Fall 2023
+Date: September 13, 2023
+Programming Assignment: PA1
+Description: The program reads information about pets from a file called "petstoredata.csv".
+It processes this data without using global variables, and everything is contained within the main() function. 
+The information includes details like pet name, animal type, and the number of days the pet has been in the store. 
+As each pet's information is read, it's immediately printed out without any changes.
+Notes: 
+https://stackoverflow.com/questions/48321639/error-is-not-recognized-as-an-internal-or-external-command-operable-program-o - needed to compile
+https://stackoverflow.com/questions/11044304/can-i-push-an-array-of-int-to-a-c-vector - using arrays and ints to a vector
+https://stackoverflow.com/questions/1744665/need-help-with-getline - using getline() functions for reading and discarding the header line.
+https://www.geeksforgeeks.org/rand-and-srand-in-ccpp/ - using random to select a pet name.
+https://www.programiz.com/cpp-programming/library-function/cstdlib/srand - also using an srand
+
+Software development method approach: 
+
+
+*/
+
+#include "header.h"
+
+using namespace std;
+
+int main()
+{
+ifstream infile;
+ofstream outfile;
+
+
+    // Declaring all vectors and strings
+    vector<string> header; // for header
+    vector<string> petStoreNames; // the names of the pet stores
+    vector<string> petNames; // the names of the pets
+    vector<string> petTypes; // the types of pets
+    vector<string> lineParts; // parts of lines
+    vector<string> uniquePetStoreNames; // unique names of pet stores
+    vector<int> uniquePetStoreNameCounts; // how many unique names of pet stores there are
+    vector<int> numDaysAtStore; // the number of days at store
+    stringstream lineToParse; //
+
+    openFiles(infile); // opening input file
+    openFiles2(outfile); // opening output file
+
+    // reading pet data
+    readPetData(infile, petStoreNames, petNames, petTypes, numDaysAtStore);
+
+    double averageDays = calculateAverageDays(numDaysAtStore);
+    string storeWithMostPets;
+    int maxPetCount;
+    findStoreWithMostPets(petStoreNames, storeWithMostPets, maxPetCount);
+    string employeePetOfTheMonth = chooseEmployeePetOfTheMonth(petNames);
+    
+    // Close files
+    infile.close();
+    outfile.close();
+
+}
+
+
+definitions.cpp
+
+/*
+Name: Kirk Shelton
+Class: CPSC122, Fall 2023
+Date: September 13, 2023
+Programming Assignment: PA1
+Description: The program reads information about pets from a file called "petstoredata.csv".
+It processes this data without using global variables, and everything is contained within the main() function. 
+The information includes details like pet name, animal type, and the number of days the pet has been in the store. 
+As each pet's information is read, it's immediately printed out without any changes.
+Notes: 
+https://stackoverflow.com/questions/48321639/error-is-not-recognized-as-an-internal-or-external-command-operable-program-o - needed to compile
+https://stackoverflow.com/questions/11044304/can-i-push-an-array-of-int-to-a-c-vector - using arrays and ints to a vector
+https://stackoverflow.com/questions/1744665/need-help-with-getline - using getline() functions for reading and discarding the header line.
+https://www.geeksforgeeks.org/rand-and-srand-in-ccpp/ - using random to select a pet name.
+https://www.programiz.com/cpp-programming/library-function/cstdlib/srand - also using an srand
+
+Software development method approach: 
+1.	State the problem clearly:  
+The program will gather information about the “inventory” of a pet store from an input file, 
+then it will print a summary report to petreport.txt.  This goes along with reading and adding the contents of the pet store inventory
+ into vectors, processing the data from those vectors (also use parallel vectors) with creating an output text report. Global variables
+  are NOT allowed in the solution, it all must be within main().  We also should use functions to process the pet data and make portions
+   of the summary report.  The input file contains information about pets, including the store, pet name, animal type, and the number 
+of days the pet has been in the store.  Open and read a file called "petstoredata.csv" that contains information about different pets.
+ There could be any number of pets in the file, and as you read each pet's information, you should immediately print it out without 
+ any changes.  Keep track and alert of names, total number of pets from input, pet store with most pets, number of pets at the store 
+ with the most pets, pet average days on site across all stores, and the employee of the month which is randomly chosen.  Write the 
+ summary at the end.
+2.	The input file contains information about pets, including:
+store name, pet name, animal type, and the number of days each pet has been in the store location. 
+The "Days in store" value is guaranteed to be at least 1, and pets are moved to a different store after 100 days.
+The output file contains information about pets written to petreport. Txt
+3.	The additional requirements show that the program takes the input file containing pet information, puts it based on the provided details, and generates status messages for each pet. Additionally, it creates a pet store summary in the form of an output file named "petreport.txt".
+4.	
+-   Read pet file
+-	Store this data into vectors.
+-	Summary of this data is written to petreport.txt
+-	Close the output file.
+
+*/
+
+
+#include "header.h"
+ifstream infile;
+ofstream outfile;
+ 
+/*************************************************************
+* Function: openFiles ()
+* Date Created: 9/14/23
+* Date Last Modified: 9/15/23
+* Description: Opens the petstoredata.csv for reading
+* Input parameters: ifstream &infile: A reference to the input file stream object.
+* Returns: bool: Returns true if the file is opened and false otherwise.
+* Pre: The function assumes that the file "petstoredata.csv" exists in the same directory.
+* Post: The input file stream object 'infile' is open and ready for reading data from the file.
+*************************************************************/
+bool openFiles(ifstream & infile) {
+    infile.open("petstoredata.csv");
+    if (!infile) {
+        cout << "There was an error opening the input file..." << endl;
+        return false;
+    }
+}
+
+// use a file checker to see if the file is open instead of boolean
+
+
+/*************************************************************
+* Function: openFiles2 ()
+* Date Created: 9/14/23
+* Date Last Modified: 9/15/23
+* Description: This function opens the petreport.txt file in write mode.
+* Input parameters: outfile: An ofstream object that will be used to handle the output stream.
+* Returns: bool: Returns a boolean value indicting whether the file was successfully opened.
+* Returns true if successful, false otherwise.
+* Pre: The function assmes that the petreport.txt file exists in the current directory
+* Post: The petreport.txt file is opened in write mode. 
+* If successful, the ofstream object passed as a parameter will be associated with this file.
+*************************************************************/
+bool openFiles2(ofstream & outfile){
+    outfile.open("petreport.txt");
+    if (!outfile) {
+        cout << "There was an error opening the output file..." << endl;
+        return false;
+    }
+
+    return true;
+}
+// use a file checker to see if the file is open instead of boolean
+
+
+
+/*************************************************************
+* Function: readPetData()
+* Date Created: 9/14/23
+* Date Last Modified: 9/15/23
+* Description: Reads pet data from the input file into vectors 
+* Input parameters: 
+* Returns: 
+* Pre: 
+* Post: 
+*************************************************************/
+void readPetData(ifstream & infile, vector<string> & petStoreNames, vector<string> & petNames,
+                 vector<string>& petTypes, vector<int>& numDaysAtStore) {
+    string line;
+    getline(infile, line); // Read and discard the header line
+
+    while (getline(infile, line)) {
+        stringstream lineToParse(line);
+        string petStoreName, petName, petType;
+        int daysAtStore;
+
+        getline(lineToParse, petStoreName, ',');
+        getline(lineToParse, petName, ',');
+        getline(lineToParse, petType, ',');
+        lineToParse >> daysAtStore;
+
+        petStoreNames.push_back(petStoreName);
+        petNames.push_back(petName);
+        petTypes.push_back(petType);
+        numDaysAtStore.push_back(daysAtStore);
+
+        cout << "Processed a " << petType << ", \"" << petName << "\" ... "
+             << daysAtStore << " day(s) on site at store \"" << petStoreName << "\"." << endl;
+    }
+}
+
+
+/*************************************************************
+* Function: calculateAverageDays ()
+* Date Created: 9/14/23
+* Date Last Modified: 9/15/23
+* Description: Calculating the average days in the store
+* Input parameters: vectors such as string, petStoreNames, petNames, petTypes,and int numDaysAtStore
+* Returns: n/a
+* Pre: The input file stream (infile) is open and valid.
+* Post: Vectors such as petStoreNames, petNames, petTypes, and numDaysAtStore will be with data from the input file.
+*************************************************************/
+double calculateAverageDays(vector<int> & numDaysAtStore) {
+    int sum = 0;
+    for (int days : numDaysAtStore) {
+        sum += days;
+    }
+    return sum / numDaysAtStore.size();
+}
+
+
+/*************************************************************
+* Function: findStoreWithMostPets ()
+* Date Created: 9/14/23
+* Date Last Modified: 9/15/23
+* Description: Finding the pet store with the most pets
+* Input parameters: petstoreNames, storeName, maxCount
+* Returns: n/a
+* Pre: The input vector petStoreNames should not be empty.
+* Post: The variables storeName and maxCount will be updated with the name of the store
+*************************************************************/
+void findStoreWithMostPets(vector<string> & petStoreNames, string & storeName, int & maxCount) {
+    // Implement logic to find the store with the most pets
+    // ...
+}
+
+
+/*************************************************************
+* Function: chooseEmployeeofTheMonth ()
+* Date Created: 9/14/23
+* Date Last Modified: 9/15/23
+* Description: Function to randomly choose a pet as the Employee Pet of the Month
+* Input parameters: vector<string> & petNames - a vector of strings containing the names of pets.
+* Returns: Returns petNames
+* Pre: The vector petNames must not be empty.
+* Post: n/a
+*************************************************************/
+string chooseEmployeePetOfTheMonth(vector<string> & petNames) {
+    srand((time(0)));
+    int randomIndex = rand() % petNames.size();
+    return petNames[randomIndex];
+}
+
+void printStatement(string storeWithMostPets, double averageDays,  string employeePetOfTheMonth, int maxPetCount, vector<string>petNames)
+{
+    // Priting the output summary 
+    outfile << "Total number of pets: " << petNames.size() << endl;
+    outfile << "Pet store with the most pets: " << storeWithMostPets << " (" << maxPetCount << " pets)" << endl;
+    outfile << "Average days at the store: " << averageDays << endl;
+    outfile << "Employee Pet of the Month: " << employeePetOfTheMonth << endl;
+}
+
+header.h
+
+/*
+Name: Kirk Shelton
+Class: CPSC122, Fall 2023
+Date: September 13, 2023
+Programming Assignment: PA1
+Description: The program reads information about pets from a file called "petstoredata.csv".
+It processes this data without using global variables, and everything is contained within the main() function. 
+The information includes details like pet name, animal type, and the number of days the pet has been in the store. 
+As each pet's information is read, it's immediately printed out without any changes.
+Notes: 
+https://stackoverflow.com/questions/48321639/error-is-not-recognized-as-an-internal-or-external-command-operable-program-o - needed to compile
+https://stackoverflow.com/questions/11044304/can-i-push-an-array-of-int-to-a-c-vector - using arrays and ints to a vector
+https://stackoverflow.com/questions/1744665/need-help-with-getline - using getline() functions for reading and discarding the header line.
+https://www.geeksforgeeks.org/rand-and-srand-in-ccpp/ - using random to select a pet name.
+https://www.programiz.com/cpp-programming/library-function/cstdlib/srand - also using an srand
+
+Software development method approach: 
+1.	State the problem clearly:  
+The program will gather information about the “inventory” of a pet store from an input file, 
+then it will print a summary report to petreport.txt.  This goes along with reading and adding the contents of the pet store inventory
+ into vectors, processing the data from those vectors (also use parallel vectors) with creating an output text report. Global variables
+  are NOT allowed in the solution, it all must be within main().  We also should use functions to process the pet data and make portions
+   of the summary report.  The input file contains information about pets, including the store, pet name, animal type, and the number 
+of days the pet has been in the store.  Open and read a file called "petstoredata.csv" that contains information about different pets.
+ There could be any number of pets in the file, and as you read each pet's information, you should immediately print it out without 
+ any changes.  Keep track and alert of names, total number of pets from input, pet store with most pets, number of pets at the store 
+ with the most pets, pet average days on site across all stores, and the employee of the month which is randomly chosen.  Write the 
+ summary at the end.
+2.	The input file contains information about pets, including:
+store name, pet name, animal type, and the number of days each pet has been in the store location. 
+The "Days in store" value is guaranteed to be at least 1, and pets are moved to a different store after 100 days.
+The output file contains information about pets written to petreport. Txt
+3.	The additional requirements show that the program takes the input file containing pet information, puts it based on the provided details, and generates status messages for each pet. Additionally, it creates a pet store summary in the form of an output file named "petreport.txt".
+4.	
+-   Read pet file
+-	Store this data into vectors.
+-	Summary of this data is written to petreport.txt
+-	Close the output file.
+
+*/
+
+#ifndef HEADER_H
+#define HEADER_H
+
+#include <iostream>
+#include <string>
+#include <fstream>
+#include <sstream>
+#include <vector>
+#include <cstdlib>
+
+using namespace std;
+
+bool openFiles(ifstream & infile);
+bool openFiles2(ofstream& outfile);
+
+// Function to read pet data from the input file into vectors
+void readPetData(ifstream& infile, vector<string>& petStoreNames, vector<string>& petNames,
+                 vector<string>& petTypes, vector<int>& numDaysAtStore);
+
+// Function to calculate the average days at the store
+double calculateAverageDays(vector<int>& numDaysAtStore);
+
+// Function to find the pet store with the most pets
+void findStoreWithMostPets(vector<string> & petStoreNames, string & storeName, int & maxCount);
+
+// Function to randomly choose a pet as the Employee Pet of the Month
+string chooseEmployeePetOfTheMonth(vector<string> & petNames);
+
+// Function to print the final statement.
+void printStatement(string storeWithMostPets, double averageDays,  string employeePetOfTheMonth, int maxPetCount, vector<string>petNames);
+#endif
+
+
+petstoredata.csv
+
+Pet Store,Pet Name,Pet Type,Days at Store
+Fur Get Me Not,Chris P. Bacon,pig,1
+Pick of the Litter,Mary Puppins,dog,17
+For Pet's Sake,Jean-Clawed Van Damme,cat,60
+Fur Get Me Not,Jack Meower,cat,24
+Fur Get Me Not,Severus Snake,snake,12
+For Pet's Sake,Lame Duck,duck,5
+Pick of the Litter,Barktholamew,dog,101
+
+
+
